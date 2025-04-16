@@ -25,4 +25,4 @@ jobs:
 
     - name: Test SSH connection
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa imbydata@20.107.247.116 "date"  # подключаемся по SSH
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa imbydata@20.107.247.116 "powershell Get-Process"  # подключаемся по SSH
