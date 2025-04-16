@@ -30,4 +30,4 @@ jobs:
       - name: Run remote SSH command
         run: |
           # Запуск SSH с указанием ключа
-          ssh -i $env:USERPROFILE\.ssh\id_rsa imbydata@20.107.247.116 "echo Hello from server && uptime"
+          ssh -v -i $env:USERPROFILE\.ssh\id_rsa imbydata@20.107.247.116 "echo Hello from server && uptime"
