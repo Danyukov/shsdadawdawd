@@ -1,4 +1,4 @@
-name: Deploy to Azure Windows VM
+name: Test SSH connection to Azure
 
 on:
   push:
@@ -6,25 +6,22 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest  # Используем Ubuntu runner для выполнения SSH
+  ssh_test:
+    runs-on: ubuntu-latest  # Используем Ubuntu runner для SSH
 
     steps:
-    # Checkout репозитория
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Установим SSH и ключи 
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H 20.107.247.116> ~/.ssh/known_hosts
+        ssh-keyscan -H 20.107.247.116 >> ~/.ssh/known_hosts
 
-    # Выполнение команды на Windows VM через SSH
-    - name: Deploy via SSH
+    - name: Test SSH connection
       run: |
-        ssh -i ~/.ssh/id_rsa imbydata@20.107.247.116 "date"
+        ssh -i ~/.ssh/id_rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa imbydata@20.107.247.116 "date"
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
