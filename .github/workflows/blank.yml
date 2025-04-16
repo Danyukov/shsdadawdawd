@@ -15,12 +15,19 @@ jobs:
 
       - name: Setup SSH key
         run: |
-          mkdir $env:USERPROFILE\.ssh
-          $env:SSH_PRIVATE_KEY = "${{ secrets.ssh_key }}"
-          Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value $env:SSH_PRIVATE_KEY
+          # Создание директории для SSH ключа
+          mkdir -p $env:USERPROFILE\.ssh
+          
+          # Преобразование секрета в файл
+          Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value "${{ secrets.ssh_key }}"
+          
+          # Установка прав доступа
           icacls $env:USERPROFILE\.ssh\id_rsa /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
-          ssh-keyscan -H your.server.com >> $env:USERPROFILE\.ssh\known_hosts
+          
+          # Добавление ключа сервера в known_hosts
+          ssh-keyscan -H 20.107.247.116 >> $env:USERPROFILE\.ssh\known_hosts
 
       - name: Run remote SSH command
         run: |
+          # Запуск SSH с указанием ключа
           ssh -i $env:USERPROFILE\.ssh\id_rsa imbydata@20.107.247.116 "echo Hello from server && uptime"
