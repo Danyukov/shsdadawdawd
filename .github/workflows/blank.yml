@@ -1,13 +1,13 @@
-name: Test SSH connection to Azure
+name: SSH Connection Workflow
 
 on:
   push:
     branches:
-      - main
+      - main  # или другая ветка, по которой вы хотите запускать workflow
 
 jobs:
   ssh_test:
-    runs-on: ubuntu-latest  # Используем Ubuntu runner для SSH
+    runs-on: ubuntu-latest  # или другая операционная система, если необходимо
 
     steps:
     - name: Checkout repository
@@ -17,12 +17,12 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H 20.107.247.116 >> ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/id_rsa  # установить права на ключ
+        ssh-keyscan -H 20.107.247.116 >> ~/.ssh/known_hosts  # добавить хост в known_hosts
+
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # используем секрет из GitHub Secrets
 
     - name: Test SSH connection
       run: |
-        ssh -v -i ~/.ssh/id_rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa imbydata@20.107.247.116 "date"
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa imbydata@20.107.247.116 "date"  # подключаемся по SSH
