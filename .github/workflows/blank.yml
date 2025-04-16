@@ -22,7 +22,7 @@ jobs:
 
     - name: Test SSH connection
       run: |
-        ssh -vvv -i ~/.ssh/id_rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa imbydata@20.107.247.116 "date"
+        ssh -v -i ~/.ssh/id_rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa imbydata@20.107.247.116 "date"
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
