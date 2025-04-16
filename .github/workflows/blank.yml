@@ -1,0 +1,26 @@
+name: SSH Connect with PEM Key (Windows Runner)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ssh-job:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        run: |
+          mkdir $env:USERPROFILE\.ssh
+          $env:SSH_PRIVATE_KEY = "${{ secrets.ssh_key }}"
+          Set-Content -Path $env:USERPROFILE\.ssh\id_rsa -Value $env:SSH_PRIVATE_KEY
+          icacls $env:USERPROFILE\.ssh\id_rsa /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
+          ssh-keyscan -H your.server.com >> $env:USERPROFILE\.ssh\known_hosts
+
+      - name: Run remote SSH command
+        run: |
+          ssh -i $env:USERPROFILE\.ssh\id_rsa imbydata@20.107.247.116 "echo Hello from server && uptime"
