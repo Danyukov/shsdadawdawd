@@ -1,0 +1,70 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: visualizer-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: visualizer-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - visualizer-db-data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+  backend:
+    build:
+      context: ./backend/visualizer-go  # Путь к бэкенду
+    container_name: visualizer-backend
+    ports:
+      - "8888:8888"
+    environment:
+      - CONFIG_PATH=/app/configs/local.yaml
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=visualizer-db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=root
+    networks:
+      - backend-network
+    depends_on:
+      - postgres
+    # Задержка перед запуском бэкенда
+    command: sh -c "sleep 10 && /app/visualizerlinux3"  # Здесь мы запускаем ваш бинарный файл с задержкой 10 секунд
+
+  frontend:
+    build:
+      context: ./frontend/visualizer-react  # Путь к фронтенду
+    container_name: visualizer-frontend
+    ports:
+      - "80:80"  # Проброс порта для фронтенда
+    networks:
+      - backend-network
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: visualizer-nginx
+    ports:
+      - "8080:8080"  # Проброс порта 8080 на хосте
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Подключаем конфигурацию Nginx
+    networks:
+      - backend-network
+    depends_on:
+      - backend
+      - frontend
+    # Задержка перед запуском Nginx
+    command: sh -c "sleep 15 && nginx -g 'daemon off;'"
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  visualizer-db-data:
+    driver: local
